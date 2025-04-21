@@ -5,16 +5,26 @@ import Modal from "@/Components/Modal/Modal";
 
 const page = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedNote, setSelectedNote] = useState(null);
+  const [selectedNote, setSelectedNote] = useState({
+    title:"",
+    createdBy: "",
+    date: "",
+  });
 
   const handleOpen = (title) => {
-    setSelectedNote(title);
+    setSelectedNote({
+        title:title,
+        date:"30/23",
+        createdBy: "John Doe"
+    });
     setIsOpen(true);
   };
 
   const handleClose = () => {
     setIsOpen(false);
-    setSelectedNote(null);
+    setSelectedNote({title:"",
+        createdBy: "",
+        date: "",});
   };
   return (
     <div className="w-screen h-screen flex flex-col overflow-x-hidden">
@@ -46,7 +56,7 @@ const page = () => {
       </div>
 
       {isOpen && selectedNote && (
-        <Modal title={selectedNote} onClose={handleClose} />
+        <Modal data={selectedNote} onClose={handleClose} />
       )}
     </div>
   );
