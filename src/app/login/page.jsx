@@ -3,14 +3,15 @@
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import Cookies from "js-cookie";
 
 const page = () => {
   const router = useRouter();
   const [data, setData] = useState({
-    username: "",
+    identifier: "", // Change 'username' to 'identifier'
     password: "",
   });
-  const { username, password } = data;
+  const { identifier, password } = data;
   const [isShow, setIsShow] = useState(false);
 
   const handleData = (e) => {
@@ -18,11 +19,34 @@ const page = () => {
     setData({ ...data, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const res = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-    router.push("/notes")
+      const result = await res.json();
+
+      if (res.ok) {
+        // Store the tokens (access and refresh)
+        Cookies.set("accessToken", result.accessToken);
+        localStorage.setItem("refreshToken", result.refreshToken);
+
+        // Redirect to notes page
+        router.push("/notes");
+      } else {
+        alert(result.message || "Login failed");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+    }
   };
+
   return (
     <div className="flex items-center justify-center w-screen h-screen bg-white">
       <form
@@ -33,14 +57,14 @@ const page = () => {
         <input
           type="text"
           placeholder="Email or Username"
-          name="username"
-          value={username}
+          name="identifier" // Update to 'identifier' for the login API
+          value={identifier} // Bind with 'identifier'
           className="w-full outline-none border border-blue-600 rounded-xl px-4 py-2"
           onChange={handleData}
         />
         <div className="w-full border border-blue-600 rounded-xl px-4 py-2 flex items-center justify-between">
           <input
-            type={isShow ? "text" :"password"}
+            type={isShow ? "text" : "password"}
             placeholder="Password"
             name="password"
             value={password}
