@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDeleteNote, useNotes } from "@/Apis/Notes";
 import Modal from "@/Components/Modal/Modal";
 import { useLogout } from "@/Apis/Auth";
@@ -9,12 +9,13 @@ import EditNotes from "@/Components/Modal/EditNotes";
 
 
 const Page = () => {
+
+  const [user, setUser] = useState(null);
+
   const [isOpen, setIsOpen] = useState(false);
   const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
   const [isEditNoteOpen, setIsEditNoteOpen] = useState(false);
   const [editData, setEditData] = useState(null);
-
-
 
   const [selectedNote, setSelectedNote] = useState({
     title: "",
@@ -68,6 +69,11 @@ const Page = () => {
     setIsEditNoteOpen(true)
   }
 
+  const closeEditModal= () => {
+    setEditData(null);
+    setIsEditNoteOpen(false)    
+  }
+
   const nextPage = () => {
     if (data?.currentPage < data?.totalPages) {
       setPage((prev) => prev + 1);
@@ -80,10 +86,19 @@ const Page = () => {
     }
   };
 
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  if (!user) {
+    return <p>Redirecting to login...</p>; // or show spinner
+  }
 
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">Failed to load notes.</div>;
 
   return (
     <div className="w-screen h-screen flex flex-col overflow-x-hidden">
@@ -108,30 +123,6 @@ const Page = () => {
         </div>
       </div>
 
-      {/* <div className="relative grid grid-cols-5 gap-6 px-10 max-xl:grid-cols-4 max-lg:grid-cols-3 max-md:grid-cols-2 max-sm:grid-cols-1 py-10">
-
-        {data?.data.map((note, index) => (
-          <div
-            key={`notes${index}`}
-            onClick={() => handleOpen(note.title, note.createdBy, note.date, note.desc)}
-            className="rounded-3xl border border-blue-600 p-4 flex flex-col cursor-pointer hover:bg-blue-50 transition"
-          >
-            <div className="flex flex-col gap-2">
-              <h2 className="text-2xl font-semibold text-black">{note.title}</h2>
-              <div className="flex items-center justify-between">
-              <p className="text-base font-medium text-gray-500">
-  {new Date(note.createdAt).toLocaleDateString("en-GB")}
-</p>
-
-                <p className="text-base font-medium text-gray-500">
-                  Created By: {note.createdBy.username}
-                </p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div> */}
-
 <div className="relative grid grid-cols-5 gap-6 px-10 max-xl:grid-cols-4 max-lg:grid-cols-3 max-md:grid-cols-2 max-sm:grid-cols-1 py-10">
   {data?.data.map((note, index) => (
     <div
@@ -140,7 +131,7 @@ const Page = () => {
       className="relative rounded-3xl border border-blue-600 p-4 flex flex-col cursor-pointer hover:bg-blue-50 transition"
     >
       {/* Edit + Delete Icons */}
-      {note.createdBy._id && (
+      {note.createdBy._id === user._id && (
         <div className="absolute top-3 right-3 flex gap-2 z-10" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => openEditModal(note)}
@@ -195,7 +186,7 @@ const Page = () => {
         <AddNotes  onClose={toggleNoteAddModal} />
       )}
       {isEditNoteOpen && editData && (
-        <EditNotes  onClose={setIsEditNoteOpen} editData={editData} />
+        <EditNotes  onClose={closeEditModal} editData={editData} />
       )}
     </div>
   );

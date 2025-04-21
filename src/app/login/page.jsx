@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import Cookies from "js-cookie";
+import { useLogin } from "@/Apis/Auth";
 
-const page = () => {
+const Page = () => {
   const router = useRouter();
   const [data, setData] = useState({
     identifier: "", // Change 'username' to 'identifier'
@@ -19,29 +20,40 @@ const page = () => {
     setData({ ...data, [name]: value });
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const res = await fetch("http://localhost:5000/api/login", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(data),
+  //     });
+
+  //     const result = await res.json();
+
+  //     if (res.ok) {
+  //       // Store the tokens (access and refresh)
+  //       Cookies.set("accessToken", result.accessToken);
+  //       localStorage.setItem("refreshToken", result.refreshToken);
+
+  //       // Redirect to notes page
+  //       router.push("/notes");
+  //     } else {
+  //       alert(result.message || "Login failed");
+  //     }
+  //   } catch (err) {
+  //     console.error("Login error:", err);
+  //   }
+  // };
+
+  const loginMutation = useLogin();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await res.json();
-
-      if (res.ok) {
-        // Store the tokens (access and refresh)
-        Cookies.set("accessToken", result.accessToken);
-        localStorage.setItem("refreshToken", result.refreshToken);
-
-        // Redirect to notes page
-        router.push("/notes");
-      } else {
-        alert(result.message || "Login failed");
-      }
+      loginMutation.mutate(data);
     } catch (err) {
       console.error("Login error:", err);
     }
@@ -94,4 +106,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

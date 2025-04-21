@@ -10,21 +10,14 @@ export const useNotes = (page = 1, limit = 10) => {
     queryFn: async () => {
       console.log("Fetching notes...");
       const accessToken = Cookies.get("accessToken");
-      console.log("Access Token:", accessToken);
-
       const response = await axios.get(`${baseUrl}/api/notes/all-notes`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         },
-        params: { page, limit } // Pass page and limit as query params
+        params: { page, limit }
       });
-
-      console.log(response.data.data, "Correct");
-      console.log(response.data, "check");
-
       return response.data;
     },
-    // Optional: Handle background refetching or retries
     refetchOnWindowFocus: false,
     retry: false
   });
@@ -32,7 +25,6 @@ export const useNotes = (page = 1, limit = 10) => {
 
 export const useCreateNote = onClose => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ title, desc }) => {
       const accessToken = Cookies.get("accessToken");
@@ -49,7 +41,7 @@ export const useCreateNote = onClose => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["notes"]);
-      if (onClose) onClose(); // Close modal if provided
+      if (onClose) onClose();
     },
     onError: err => {
       console.error("Failed to create note:", err);

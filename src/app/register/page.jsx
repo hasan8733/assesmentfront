@@ -1,9 +1,10 @@
 "use client";
 
+import { useRegister } from "@/Apis/Auth";
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 
-const page = () => {
+const Page = () => {
   const [data, setData] = useState({
     username: "",
     email: "",
@@ -12,13 +13,17 @@ const page = () => {
   const { username, email, password } = data;
   const [isShow, setIsShow] = useState(false);
 
+  const registerMutation = useRegister();
+
   const handleData = (e) => {
     const { value, name } = e.target;
     setData({ ...data, [name]: value });
   };
 
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    registerMutation.mutate(data);
   };
   return (
     <div className="flex items-center justify-center w-screen h-screen bg-white">
@@ -75,4 +80,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
